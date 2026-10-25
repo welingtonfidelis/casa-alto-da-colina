@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: palco 3D em tela cheia; título discreto no topo, informação do cômodo numa pílula embaixo e um botão flutuante que abre as opções em arco */
+/* Layout: palco 3D em tela cheia. Celular: barra de ícones embaixo, camadas no topo, manete à direita. Tela grande: painel lateral com grupos rotulados. */
 :root{
   --bg:#e6eaee; --surface:#f8fafb; --ink:#1b2632; --muted:#5b6977; --line:#cbd3da;
   --accent:#c1402c; --wall:#f3f2ef; --ground:#b4c2a0; --road:#9aa3ab; --sidewalk:#c4cbd1; --roof:#8e979f;
@@ -34,55 +34,107 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
 .top h1{margin:0;font-family:var(--f-display);font-weight:600;font-size:18px;letter-spacing:.09em;text-transform:uppercase;line-height:1}
 .top p{margin:4px 0 0;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);letter-spacing:.02em}
 
-.glass{background:var(--surface);background:color-mix(in srgb,var(--surface) 84%,transparent);
+.glass{background:var(--surface);background:color-mix(in srgb,var(--surface) 86%,transparent);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--line);box-shadow:0 6px 22px rgba(15,23,32,.12)}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-.info{position:fixed;z-index:6;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));
-  top:calc(env(safe-area-inset-top,0px) + 56px);display:flex;pointer-events:none}
-.pill{pointer-events:auto;border-radius:24px;min-width:0;max-width:100%}
+/* botões de controle (comuns aos dois layouts) */
+.btn{appearance:none;border:0;background:transparent;color:var(--ink);cursor:pointer;padding:0;
+  display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--f-display);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.btn svg{width:18px;height:18px;flex:none}
+.btn span{text-align:left}
+.btn .lg{display:none}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.grp{display:flex}
+.glabel{display:none}
+.bar .btn[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.layers .btn[aria-pressed="false"]{color:var(--muted)}
+.layers .btn[aria-pressed="false"] svg{opacity:.45}
+.help{display:none}
+
+/* ===== telas pequenas: barra inferior + camadas no topo ===== */
+.side{display:contents}
+.bar{position:fixed;z-index:6;left:0;right:0;bottom:0;border-width:1px 0 0;box-shadow:0 -4px 18px rgba(15,23,32,.08);
+  padding:6px max(10px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 6px) max(10px,env(safe-area-inset-left,0px));
+  display:flex;justify-content:center;gap:6px}
+.bar .grp{flex:1 1 0;max-width:260px;gap:2px}
+.bar .grp.views{flex-grow:1.33;max-width:346px}
+.bar .grp+.grp{border-left:1px solid var(--line);padding-left:6px}
+.bar .btn{flex:1 1 0;min-width:0;flex-direction:column;gap:3px;height:50px;border-radius:12px;font-size:9.5px}
+.bar .btn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.layers{position:fixed;z-index:6;top:calc(env(safe-area-inset-top,0px) + 10px);right:max(12px,env(safe-area-inset-right,0px));
+  display:flex;gap:6px;border-radius:14px;padding:4px}
+.layers .btn{width:40px;height:40px;border-radius:10px}
+.layers .btn span{display:none}
+.info{position:fixed;z-index:6;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));
+  top:calc(env(safe-area-inset-top,0px) + 58px);display:flex;pointer-events:none}
+.pill{pointer-events:auto;border-radius:20px;min-width:0;max-width:100%}
 #hint{padding:9px 14px;font-size:12px;color:var(--muted);line-height:1.35}
 #room{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 16px}
-#room[hidden]{display:none}
+#room[hidden],#hint[hidden]{display:none}
 .txt{min-width:0}
-.l1{display:flex;align-items:baseline;gap:8px}
-.nm{font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.l1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.nm{font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:.04em;text-transform:uppercase}
 .ar{font-family:var(--f-mono);font-size:12px;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums}
-.mt{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.mt{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .x{flex:none;width:30px;height:30px;border-radius:50%;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .x:hover{background:var(--line)}
 .x svg{width:14px;height:14px}
+.x:focus-visible{outline:2px solid var(--accent)}
 
-.scrim{position:fixed;inset:0;z-index:7;background:rgba(10,15,22,.22);opacity:0;pointer-events:none;transition:opacity .2s}
-.scrim.on{opacity:1;pointer-events:auto}
-.fab-wrap{position:fixed;z-index:8;width:56px;height:56px;
-  left:calc(max(16px,env(safe-area-inset-left,0px)) + 2px);bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
-.fab{position:relative;z-index:2;width:56px;height:56px;border-radius:50%;border:0;background:var(--ink);color:var(--surface);
-  display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 24px rgba(15,23,32,.3)}
-.fab svg{width:22px;height:22px;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
-.fab[aria-expanded="true"] svg{transform:rotate(135deg)}
-.sat{position:absolute;left:4px;top:4px;width:48px;height:48px;border-radius:50%;padding:0;cursor:pointer;
-  color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  font-family:var(--f-display);font-weight:600;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
-  opacity:0;pointer-events:none;transform:translate(0,0) scale(.4);
-  transition:transform .34s cubic-bezier(.2,.8,.2,1),opacity .2s;transition-delay:calc(var(--i)*22ms)}
-.open .sat{opacity:1;pointer-events:auto;transform:translate(calc(var(--x) * -1),var(--y)) scale(1)} /* arco abre para a direita */
-.sat svg{width:17px;height:17px}
-.sat.mode[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:transparent}
-.sat.view[aria-pressed="true"],.sat.tool[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
-.fab:focus-visible,.sat:focus-visible,.x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-
-.joy{position:fixed;z-index:6;width:108px;height:108px;border-radius:50%;
-  right:max(20px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);
+.joy{position:fixed;z-index:6;width:96px;height:96px;border-radius:50%;
+  right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 78px);
   display:grid;place-items:center;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.joy::before{content:"";position:absolute;inset:16px;border-radius:50%;border:1px dashed var(--line)}
+.joy::before{content:"";position:absolute;inset:14px;border-radius:50%;border:1px dashed var(--line)}
 .joy.on{cursor:grabbing}
 .joy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.knob{position:relative;width:46px;height:46px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;
+.knob{position:relative;width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;
   box-shadow:0 4px 14px rgba(15,23,32,.3);transition:transform .2s cubic-bezier(.2,.8,.2,1)}
 .joy.on .knob{transition:none;background:var(--accent);color:#fff}
-.knob svg{width:18px;height:18px}
-@media (prefers-reduced-motion:reduce){.sat,.fab svg,.scrim{transition:none}}
+.knob svg{width:17px;height:17px}
+
+@media (max-width:360px){.bar .btn span{display:none}.bar .btn{height:44px}.joy{bottom:calc(env(safe-area-inset-bottom,0px) + 70px)}}
+@media (max-height:480px) and (orientation:landscape){
+  .bar{left:auto;top:0;bottom:0;width:auto;flex-direction:column;justify-content:center;border-width:0 0 0 1px;
+    padding:calc(env(safe-area-inset-top,0px) + 6px) max(6px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 6px) 6px}
+  .bar .grp{flex-direction:column;flex:none}
+  .bar .grp+.grp{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:4px}
+  .bar .btn{width:52px;height:40px;flex:none}.bar .btn span{display:none}
+  .joy{right:calc(max(14px,env(safe-area-inset-right,0px)) + 76px);bottom:calc(env(safe-area-inset-bottom,0px) + 14px)}
+  .layers{right:calc(max(12px,env(safe-area-inset-right,0px)) + 72px)}
+  .info{right:calc(max(12px,env(safe-area-inset-right,0px)) + 72px)}
+}
+
+/* ===== telas grandes: painel lateral ===== */
+@media (min-width:900px) and (min-height:560px){
+  .side{display:flex;flex-direction:column;gap:10px;position:fixed;z-index:6;width:236px;
+    left:max(20px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 70px);
+    max-height:calc(100% - 90px);overflow:auto}
+  .top{padding-top:calc(env(safe-area-inset-top,0px) + 22px);padding-left:max(22px,env(safe-area-inset-left,0px))}
+  .top h1{font-size:22px}
+  .bar,.layers,.info{position:static;inset:auto;width:auto}
+  .bar{display:flex;flex-direction:column;gap:12px;border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:0 6px 22px rgba(15,23,32,.12)}
+  .bar .grp,.bar .grp.views{flex-direction:column;max-width:none;gap:2px}
+  .bar .grp+.grp{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:10px}
+  .glabel{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 4px 6px}
+  .bar .btn,.layers .btn{flex:none;flex-direction:row;justify-content:flex-start;width:100%;height:38px;padding:0 10px;border-radius:10px;font-size:14px;gap:10px}
+  .bar .btn:hover:not([aria-pressed="true"]),.layers .btn:hover{background:var(--line)}
+  .layers{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:16px}
+  .layers .btn span{display:inline}
+  .btn .lg{display:inline}.btn .sh{display:none}
+  .layers .btn::after{content:"";margin-left:auto;width:28px;height:16px;border-radius:9px;flex:none;
+    background:radial-gradient(circle at 8px 50%,#fff 5px,transparent 5.6px) var(--line)}
+  .layers .btn[aria-pressed="true"]::after{background:radial-gradient(circle at 20px 50%,#fff 5px,transparent 5.6px) var(--accent)}
+  .info{display:block}
+  #room{border-radius:16px;padding:12px 10px 12px 14px;align-items:flex-start}
+  #room .nm{font-size:20px}
+  #hint{display:none}
+  .help{display:block;font-size:11.5px;line-height:1.5;color:var(--muted);padding:0 6px}
+  .help kbd{font-family:var(--f-mono);font-size:10.5px;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--ink)}
+  .joy{bottom:calc(env(safe-area-inset-bottom,0px) + 22px);right:max(22px,env(safe-area-inset-right,0px));width:108px;height:108px}
+}
+@media (min-width:900px) and (hover:hover) and (pointer:fine){.joy{display:none}}
+@media (prefers-reduced-motion:reduce){.knob{transition:none}}
 .lbl{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#1b2632;
   background:rgba(255,255,255,.82);padding:2px 6px 1px;white-space:nowrap;line-height:1.15;text-align:center;border:1px solid rgba(27,38,50,.15)}
 .lbl small{display:block;font-family:var(--f-mono);font-weight:400;font-size:10px;letter-spacing:0;text-transform:none;color:#4a5866}
@@ -103,30 +155,39 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
   <p>Lote 04 · Jacuí-MG · 154,27 m²</p>
 </header>
 
-<div class="joy glass" id="joy" tabindex="0" role="application" aria-label="Manete: arraste para mover a câmera. No teclado, use as setas.">
-  <div class="knob" id="knob"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14M9.5 7.5 12 5l2.5 2.5M9.5 16.5 12 19l2.5-2.5M7.5 9.5 5 12l2.5 2.5M16.5 9.5 19 12l-2.5 2.5"/></svg></div>
-</div>
-
-<div class="info" aria-live="polite">
-  <div class="pill glass" id="hint">Arraste para girar, pinça para zoom, manete para mover. Toque num cômodo para ver as medidas.</div>
-  <div class="pill glass" id="room" hidden>
-    <div class="txt"><div class="l1"><span class="nm" id="r-nm"></span><span class="ar" id="r-ar"></span></div><div class="mt" id="r-mt"></div></div>
-    <button class="x" id="r-x" aria-label="Fechar"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+<div class="side">
+  <nav class="bar glass" aria-label="Controles de visualização">
+    <div class="grp modes" role="group" aria-label="Visualização">
+      <div class="glabel">Visualização</div>
+      <button class="btn" id="m-casa" data-mode="casa" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9H4z"/></svg><span>Casa</span></button>
+      <button class="btn" id="m-aberta" data-mode="aberta" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8v12h16V8M9 20v-6h6v6"/></svg><span class="lg">Sem teto</span><span class="sh">Aberta</span></button>
+      <button class="btn" id="m-planta" data-mode="planta" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 12h8M12 4v8M16 12v8"/></svg><span>Planta</span></button>
+    </div>
+    <div class="grp views" role="group" aria-label="Câmera">
+      <div class="glabel">Câmera</div>
+      <button class="btn" id="v-iso" data-view="iso" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12 4 7.5"/></svg><span>Iso</span></button>
+      <button class="btn" id="v-top" data-view="top" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM12 9v6M9 12h6"/></svg><span>Topo</span></button>
+      <button class="btn" id="v-front" data-view="front" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18M5 20V8h8v12M13 12h6v8"/></svg><span class="lg">Fachada</span><span class="sh">Frente</span></button>
+      <button class="btn" id="b-center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/></svg><span>Centro</span></button>
+    </div>
+  </nav>
+  <div class="layers glass" role="group" aria-label="Camadas">
+    <div class="glabel">Camadas</div>
+    <button class="btn" id="b-lot" aria-label="Muros e portões" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20V9h18v11M3 14.5h18M8 9v5.5M15 9v5.5M11.5 14.5V20"/></svg><span>Muros</span></button>
+    <button class="btn" id="b-furn" aria-label="Móveis" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6M4 15h16M6 18v2M18 18v2M7 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3"/></svg><span>Móveis</span></button>
   </div>
+  <div class="info" aria-live="polite">
+    <div class="pill glass" id="hint">Arraste para girar, pinça para zoom, manete para mover. Toque num cômodo para ver as medidas.</div>
+    <div class="pill glass" id="room" hidden>
+      <div class="txt"><div class="l1"><span class="nm" id="r-nm"></span><span class="ar" id="r-ar"></span></div><div class="mt" id="r-mt"></div></div>
+      <button class="x" id="r-x" aria-label="Fechar"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+  </div>
+  <p class="help">Arraste para girar · roda para zoom · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ou setas para mover · clique num cômodo para ver as medidas. Em <b>Sem teto</b> ou <b>Planta</b> dá para ver o interior.</p>
 </div>
 
-<div class="scrim" id="scrim"></div>
-<div class="fab-wrap" id="fabw">
-  <button class="sat glass mode" id="m-casa" data-mode="casa" style="--x:0px;--y:-84px;--i:0" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v9H4z"/></svg><span>Casa</span></button>
-  <button class="sat glass mode" id="m-aberta" data-mode="aberta" style="--x:-59px;--y:-59px;--i:1" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 8v12h16V8M9 20v-6h6v6"/></svg><span>Sem teto</span></button>
-  <button class="sat glass mode" id="m-planta" data-mode="planta" style="--x:-84px;--y:0px;--i:2" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 12h8M12 4v8M16 12v8"/></svg><span>Planta</span></button>
-  <button class="sat glass view" id="v-iso" data-view="iso" style="--x:0px;--y:-160px;--i:3" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12 4 7.5"/></svg><span>Iso</span></button>
-  <button class="sat glass view" id="v-top" data-view="top" style="--x:-49px;--y:-152px;--i:4" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM12 9v6M9 12h6"/></svg><span>Topo</span></button>
-  <button class="sat glass view" id="v-front" data-view="front" style="--x:-94px;--y:-129px;--i:5" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M3 20h18M5 20V8h8v12M13 12h6v8"/></svg><span>Fachada</span></button>
-  <button class="sat glass tool" id="s-center" style="--x:-129px;--y:-94px;--i:6"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/></svg><span>Centro</span></button>
-  <button class="sat glass tool" id="s-lot" style="--x:-152px;--y:-49px;--i:7" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><path d="M3 20V9h18v11M3 14.5h18M8 9v5.5M15 9v5.5M11.5 14.5V20"/></svg><span>Muros</span></button>
-  <button class="sat glass tool" id="s-furn" style="--x:-160px;--y:0px;--i:8" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 18v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6M4 15h16M6 18v2M18 18v2M7 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3"/></svg><span>Móveis</span></button>
-  <button class="fab" id="fab" aria-expanded="false" aria-label="Opções de visualização"><svg class="i" viewBox="0 0 24 24" style="stroke-width:2.2"><path d="M12 5v14M5 12h14"/></svg></button>
+<div class="joy glass" id="joy" tabindex="0" role="application" aria-label="Manete: arraste para mover a câmera. No teclado, use as setas.">
+  <div class="knob" id="knob"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14M9.5 7.5 12 5l2.5 2.5M9.5 16.5 12 19l2.5-2.5M7.5 9.5 5 12l2.5 2.5M16.5 9.5 19 12l-2.5 2.5"/></svg></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -535,7 +596,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)
 new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
 /* ---------- Modos ---------- */
-let mode='aberta';
+let mode='casa';
 function setMode(m){
   mode=m;
   buildWalls(m==='planta'?1.2:99);
@@ -579,24 +640,12 @@ function select(room){
 document.getElementById('r-x').addEventListener('click',()=>select(null));
 setTimeout(()=>{hintPill.hidden=true;},8000);
 
-/* menu flutuante em arco */
-const fabw=document.getElementById('fabw'), fab=document.getElementById('fab'), scrim=document.getElementById('scrim');
-const sats=[...document.querySelectorAll('.sat')];
-function menu(open){
-  fabw.classList.toggle('open',open); scrim.classList.toggle('on',open);
-  fab.setAttribute('aria-expanded',open); sats.forEach(b=>b.tabIndex=open?0:-1);
-  if(open) hintPill.hidden=true;
-}
-fab.addEventListener('click',()=>menu(!fabw.classList.contains('open')));
-scrim.addEventListener('click',()=>menu(false));
-addEventListener('keydown',e=>{if(e.key==='Escape')menu(false);});
-sats.forEach(b=>b.addEventListener('click',()=>setTimeout(()=>menu(false),160)));
-document.getElementById('s-center').addEventListener('click',recenter);
-const lotBtn=document.getElementById('s-lot');
+/* camadas e centralizar */
+document.getElementById('b-center').addEventListener('click',recenter);
+const lotBtn=document.getElementById('b-lot');
 lotBtn.addEventListener('click',()=>{lot.visible=!lot.visible; lotBtn.setAttribute('aria-pressed',lot.visible);});
-const furnBtn=document.getElementById('s-furn');
+const furnBtn=document.getElementById('b-furn');
 furnBtn.addEventListener('click',()=>{furn.visible=!furn.visible; furnBtn.setAttribute('aria-pressed',furn.visible);});
-menu(false);
 const ray=new THREE.Raycaster(), ptr=new THREE.Vector2(); let down=null;
 renderer.domElement.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];});
 renderer.domElement.addEventListener('pointerup',e=>{
@@ -672,7 +721,7 @@ function tick(now){
   controls.update(); renderer.render(scene,camera); labelR.render(scene,camera);
   requestAnimationFrame(tick);
 }
-resize(); applyTheme(); setMode('aberta'); goView('iso',true); requestAnimationFrame(tick);
+resize(); applyTheme(); setMode('casa'); goView('iso',true); requestAnimationFrame(tick);
 })();
 </script>
 
