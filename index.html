@@ -121,9 +121,10 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
   <button class="sat glass mode" id="m-aberta" data-mode="aberta" style="--x:-59px;--y:-59px;--i:1" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 8v12h16V8M9 20v-6h6v6"/></svg><span>Sem teto</span></button>
   <button class="sat glass mode" id="m-planta" data-mode="planta" style="--x:-84px;--y:0px;--i:2" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 12h8M12 4v8M16 12v8"/></svg><span>Planta</span></button>
   <button class="sat glass view" id="v-iso" data-view="iso" style="--x:0px;--y:-150px;--i:3" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12 4 7.5"/></svg><span>Iso</span></button>
-  <button class="sat glass view" id="v-top" data-view="top" style="--x:-75px;--y:-130px;--i:4" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM12 9v6M9 12h6"/></svg><span>Topo</span></button>
-  <button class="sat glass view" id="v-front" data-view="front" style="--x:-130px;--y:-75px;--i:5" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M3 20h18M5 20V8h8v12M13 12h6v8"/></svg><span>Fachada</span></button>
-  <button class="sat glass tool" id="s-center" style="--x:-150px;--y:0px;--i:6"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/></svg><span>Centro</span></button>
+  <button class="sat glass view" id="v-top" data-view="top" style="--x:-57px;--y:-139px;--i:4" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM12 9v6M9 12h6"/></svg><span>Topo</span></button>
+  <button class="sat glass view" id="v-front" data-view="front" style="--x:-106px;--y:-106px;--i:5" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M3 20h18M5 20V8h8v12M13 12h6v8"/></svg><span>Fachada</span></button>
+  <button class="sat glass tool" id="s-center" style="--x:-139px;--y:-57px;--i:6"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/></svg><span>Centro</span></button>
+  <button class="sat glass tool" id="s-lot" style="--x:-150px;--y:0px;--i:7" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><path d="M3 20V9h18v11M3 14.5h18M8 9v5.5M15 9v5.5M11.5 14.5V20"/></svg><span>Muros</span></button>
   <button class="fab" id="fab" aria-expanded="false" aria-label="Opções de visualização"><svg class="i" viewBox="0 0 24 24" style="stroke-width:2.2"><path d="M12 5v14M5 12h14"/></svg></button>
 </div>
 
@@ -135,6 +136,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
 /* ---------- Coordenadas lidas da planta baixa (px na prancha, 118,5 px = 1 m) ---------- */
 const S=118.5, CX=681, CZ=1390.5;
 const X=p=>(p-CX)/S, Z=p=>(p-CZ)/S, L=p=>p/S;
+const FRONT=Z(2428)+3.0; // alinhamento da rua: 3,00 m à frente da sala
 const H=3.5, HS=4.8; // pé-direito: alas 3,50 m; sala/cozinha 4,80 m (Corte AA)
 
 // tipos de vão (Tabela de Esquadrias)
@@ -249,14 +251,16 @@ function box(x1,x2,y0,y1,z1,z2,mat,group,edges){
 /* terreno, calçada e rua */
 const site=new THREE.Group(); scene.add(site);
 const gp=new THREE.Mesh(new THREE.PlaneGeometry(90,90),M.ground); gp.rotation.x=-Math.PI/2; gp.position.y=-0.16; gp.receiveShadow=true; site.add(gp);
-box(-20,20,-0.155,-0.13,Z(2723),Z(2723)+1.5,M.walk,site);
-box(-20,20,-0.16,-0.15,Z(2723)+1.5,Z(2723)+9,M.road,site);
+box(-20,20,-0.155,-0.13,FRONT,FRONT+1.5,M.walk,site);
+box(-20,20,-0.16,-0.15,FRONT+1.5,FRONT+9,M.road,site);
+box(X(600),X(1255),-0.155,-0.02,Z(2723),FRONT,M.walk,site); // entrada de carros
+box(X(504)-0.5,X(504)+0.5,-0.155,-0.02,Z(2723),FRONT,M.walk,site); // acesso de pedestres
 const street=document.createElement('div'); street.className='lbl street'; street.textContent='Rua João Antônio Arantes';
-const sl=new THREE.CSS2DObject(street); sl.position.set(X(681),0,Z(2723)+5.2); site.add(sl);
+const sl=new THREE.CSS2DObject(street); sl.position.set(X(681),0,FRONT+5.2); site.add(sl);
 
 /* base (contrapiso) */
 const base=new THREE.Group(); scene.add(base);
-[[583,58,1094,2113],[90,1093,600,2428],[583,2113,1272,2723],[425,2428,583,2568]].forEach(r=>box(X(r[0]),X(r[2]),-0.15,0,Z(r[1]),Z(r[3]),M.slab,base));
+[[583,58,1094,2113],[90,1093,600,2428],[583,2113,1272,2723],[425,2428,583,2723]].forEach(r=>box(X(r[0]),X(r[2]),-0.15,0,Z(r[1]),Z(r[3]),M.slab,base));
 
 /* pisos dos cômodos + rótulos */
 const floors=[];
@@ -373,6 +377,24 @@ box(X(600),X(606),H+0.1,HS+0.9,Z(1653),Z(2428),M.volume,roof);
 box(X(800),X(1000),H+0.1,H+2.2,Z(760),Z(960),M.wall,roof,true); // torre da caixa d'água 1000 L
 box(X(790),X(1010),H+2.2,H+2.3,Z(750),Z(970),M.slab,roof,true);
 
+/* lote 10 x 36 m: muros de 2,10 m e portões */
+const LOT_W=10, LOT_D=36, MH=2.1, MT=0.15, G0=-0.15;
+const xL=X(90)-0.015, xR=xL+LOT_W, zB=FRONT-LOT_D;
+const lot=new THREE.Group(); scene.add(lot);
+M.gate=new THREE.MeshStandardMaterial({color:0x2a2c2f,roughness:.6,metalness:.4});
+M.slat=new THREE.MeshStandardMaterial({color:0x3e4145,roughness:.5,metalness:.4});
+box(xL-MT,xL,G0,MH,zB-MT,FRONT,M.wall,lot,true);   // muro esquerdo
+box(xR,xR+MT,G0,MH,zB-MT,FRONT,M.wall,lot,true);   // muro direito
+box(xL-MT,xR+MT,G0,MH,zB-MT,zB,M.wall,lot,true);   // muro do fundo
+const fz0=FRONT-MT, fz1=FRONT, pg=[X(504)-0.45,X(504)+0.45], gg=[X(620),X(1235)];
+[[xL-MT,pg[0]],[pg[1],gg[0]],[gg[1],xR+MT]].forEach(([a,b])=>box(a,b,G0,MH,fz0,fz1,M.wall,lot,true));
+function gate(a,b){ // portão de chapa com ripas horizontais
+  const zc=(fz0+fz1)/2;
+  box(a,b,G0+0.05,MH-0.05,zc-0.02,zc+0.02,M.gate,lot,true);
+  for(let y=G0+0.15;y<MH-0.12;y+=0.14) box(a+0.04,b-0.04,y,y+0.08,zc+0.02,zc+0.045,M.slat,lot);
+}
+gate(pg[0],pg[1]); gate(gg[0],gg[1]);
+
 /* ---------- Tema ---------- */
 function applyTheme(){
   const c=n=>new THREE.Color(tok(n)||'#888');
@@ -403,7 +425,7 @@ function preset(v){
   const a=camera.aspect, k=a<0.8?1.75:a<1.2?1.3:1;
   if(v==='iso') return {p:[-12*k,15*k,17*k],t:[0,0,0.5]};
   if(v==='top') return {p:[0,30*k,0.01],t:[0,0,0]};
-  return {p:[0.6,1.7,Z(2723)+12*k],t:[0.2,2.4,Z(2428)]};
+  return {p:[0.6,4.2,FRONT+10*k],t:[0.2,2.0,Z(2428)]};
 }
 let fly=null;
 function goView(v,instant){
@@ -445,6 +467,8 @@ scrim.addEventListener('click',()=>menu(false));
 addEventListener('keydown',e=>{if(e.key==='Escape')menu(false);});
 sats.forEach(b=>b.addEventListener('click',()=>setTimeout(()=>menu(false),160)));
 document.getElementById('s-center').addEventListener('click',recenter);
+const lotBtn=document.getElementById('s-lot');
+lotBtn.addEventListener('click',()=>{lot.visible=!lot.visible; lotBtn.setAttribute('aria-pressed',lot.visible);});
 menu(false);
 const ray=new THREE.Raycaster(), ptr=new THREE.Vector2(); let down=null;
 renderer.domElement.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];});
