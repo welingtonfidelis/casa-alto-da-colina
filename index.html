@@ -135,6 +135,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
 }
 @media (min-width:900px) and (hover:hover) and (pointer:fine){.joy{display:none}}
 @media (prefers-reduced-motion:reduce){.knob{transition:none}}
+.dim{font-family:var(--f-mono);font-size:11.5px;font-weight:500;color:#fff;background:var(--accent);padding:2px 7px;border-radius:10px;white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 2px 8px rgba(15,23,32,.25)}
 .lbl{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#1b2632;
   background:rgba(255,255,255,.82);padding:2px 6px 1px;white-space:nowrap;line-height:1.15;text-align:center;border:1px solid rgba(27,38,50,.15)}
 .lbl small{display:block;font-family:var(--f-mono);font-weight:400;font-size:10px;letter-spacing:0;text-transform:none;color:#4a5866}
@@ -549,16 +550,41 @@ shower(997,1002,1606,1700,1040,1640);
 bed(795,978,1861,2096); stand(750,791,2052,2096); stand(982,1023,2052,2096); wardrobe(720,1000,1778,1838);
 // cozinha
 F(107,172,0,0.86,1200,1577,M.lacq); F(107,176,0.86,0.9,1200,1577,M.top); F(107,170,0,1.85,1115,1195,M.steel);
-F(107,145,1.5,2.2,1205,1577,M.lacq); F(120,165,0.86,0.91,1400,1470,M.black,false);
-F(313,425,0,0.86,1238,1463,M.walnut); F(305,433,0.86,0.9,1230,1471,M.top); F(340,398,0.9,0.91,1315,1385,M.black,false);
-[1290,1350,1410].forEach(z=>{stool(272,z);stool(466,z);});
+F(107,145,1.5,2.2,1205,1577,M.lacq); F(116,170,0.9,0.915,1395,1475,M.black,false); // cooktop na bancada da parede
+// ilha 1,00 x 2,50 m no estilo da referência: quartzo claro em cascata, sobra para banquetas com fita de LED, cuba dupla e torneira dourada
+const QZ=new THREE.MeshStandardMaterial({color:0xe7e0d4,roughness:.35});
+const CAB=new THREE.MeshStandardMaterial({color:0xece7de,roughness:.5});
+const BRASS=new THREE.MeshStandardMaterial({color:0xc9a35c,roughness:.3,metalness:.8});
+F(310,429,0.86,0.92,1202,1499,QZ);                 // tampo 6 cm
+F(310,429,0,0.86,1202,1209,QZ); F(310,429,0,0.86,1492,1499,QZ); // laterais em cascata até o piso
+F(312,397,0.08,0.86,1209,1492,CAB);                // corpo de armários, recuado do lado das banquetas
+F(316,395,0,0.08,1212,1489,M.black,false);         // rodapé recuado
+F(397,401,0.83,0.855,1212,1489,M.lamp,false);      // fita de LED sob o tampo
+[1305,1350].forEach(z=>F(338,392,0.905,0.925,z-2,z+40,M.steel,false)); // cuba dupla de embutir
+cyl(329,1350,0.018,0.92,1.24,BRASS); F(326,368,1.21,1.24,1347,1353,BRASS,false); // torneira gourmet
+function barStool(cx,cz){ // assento estofado com encosto, pés de madeira e apoio para os pés
+  F(cx-24,cx+24,0.62,0.7,cz-24,cz+24,M.pillow);
+  F(cx+18,cx+26,0.7,1.0,cz-22,cz+22,M.pillow);
+  [[-20,-20],[20,-20],[-20,20],[20,20]].forEach(([dx,dz])=>cyl(cx+dx,cz+dz,0.017,0,0.62,M.oak));
+  F(cx-21,cx+21,0.24,0.26,cz-21,cz-19,M.oak,false); F(cx-21,cx+21,0.24,0.26,cz+19,cz+21,M.oak,false);
+}
+[1238,1312,1388,1462].forEach(z=>barStool(458,z));
+function pendant(cx,cz){ // pendente de globo de vidro com haste dourada
+  cyl(cx,cz,0.006,1.78,H,BRASS);
+  const g=new THREE.Mesh(new THREE.SphereGeometry(0.13,24,16),M.glass); g.position.set(X(cx),1.64,Z(cz)); furn.add(g);
+  const b=new THREE.Mesh(new THREE.SphereGeometry(0.035,12,8),M.lamp); b.position.set(X(cx),1.64,Z(cz)); furn.add(b);
+}
+[1265,1350,1435].forEach(z=>pendant(370,z));
 // jantar
-F(289,388,0.72,0.76,1665,1895,M.oak); F(320,357,0,0.72,1700,1860,M.black);
-[1705,1780,1855].forEach(z=>{chair(262,z);chair(415,z);}); chair(338,1638); chair(338,1922);
+F(279,398,0.72,0.76,1662,1899,M.oak); F(320,357,0,0.72,1700,1860,M.black); // mesa 1,00 x 2,00 m
+[1705,1780,1855].forEach(z=>{chair(252,z);chair(425,z);}); chair(338,1634); chair(338,1926);
 // estar
-F(170,370,0,0.012,2110,2370,M.rug,false);
-sofaRun(153,383,1998,2083,'n'); sofaRun(367,452,2083,2313,'e');
-F(223,309,0,0.38,2146,2308,M.oak); F(107,150,0,0.45,2120,2336,M.walnut); F(107,112,0.95,1.62,2160,2296,M.black);
+F(160,455,0,0.012,2080,2380,M.rug,false);
+// sofá 2,90 x 1,00 m de frente para a TV, deixando um corredor de ~1,05 m da porta de entrada até o hall
+F(340,458,0,0.42,2040,2384,M.fabric); F(434,458,0.42,0.85,2040,2384,M.fabric);
+F(340,458,0.42,0.62,2040,2064,M.fabric); F(340,458,0.42,0.62,2360,2384,M.fabric);
+F(205,295,0,0.38,2175,2280,M.oak); // mesa de centro
+F(107,150,0,0.45,2120,2336,M.walnut); F(107,112,0.95,1.62,2160,2296,M.black); // rack e TV
 plant(140,2385,1); plant(545,2470,0.9);
 // garagem
 car(765,2420,0xe7e7e4); car(1090,2420,0x3b4a5c);
@@ -625,10 +651,27 @@ document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',(
 controls.addEventListener('start',()=>{fly=null;});
 
 /* ---------- Seleção ---------- */
+/* cotas das paredes do cômodo selecionado */
+const dims=new THREE.Group(); scene.add(dims);
+const dimMat=new THREE.LineBasicMaterial({color:0xc1402c,depthTest:false,transparent:true});
+function clearDims(){dims.children.slice().forEach(o=>{dims.remove(o);if(o.geometry)o.geometry.dispose();if(o.element&&o.element.parentNode)o.element.parentNode.removeChild(o.element);});}
+function showDims(room){
+  clearDims(); if(!room) return;
+  let [x1,z1,x2,z2]=room.r;
+  if(room.t==='social'){x1=107;z1=1110;x2=583;z2=2408;} // ambiente integrado inteiro
+  const n=room.d.match(/\d+,\d+/g)||[], w=n[0], d=n[1];
+  const ax1=X(x1)+0.05,ax2=X(x2)-0.05,az1=Z(z1)+0.05,az2=Z(z2)-0.05,y=0.08,ins=0.22,t=0.1;
+  dimMat.color.copy(accent);
+  const V=(x,z)=>new THREE.Vector3(x,y,z);
+  const seg=(a,b)=>{const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),dimMat);l.renderOrder=10;dims.add(l);};
+  const tag=(x,z,txt)=>{const el=document.createElement('div');el.className='dim';el.textContent=txt+' m';const o=new THREE.CSS2DObject(el);o.position.set(x,y,z);dims.add(o);};
+  if(w){const z=az2-ins; seg(V(ax1,z),V(ax2,z)); seg(V(ax1,z-t),V(ax1,z+t)); seg(V(ax2,z-t),V(ax2,z+t)); tag((ax1+ax2)/2,z,w);}
+  if(d){const x=ax2-ins; seg(V(x,az1),V(x,az2)); seg(V(x-t,az1),V(x+t,az1)); seg(V(x-t,az2),V(x+t,az2)); tag(x,(az1+az2)/2,d);}
+}
 const roomPill=document.getElementById('room'), hintPill=document.getElementById('hint');
 function select(room){
   if(selected){selected.mesh.material.emissive.setHex(0);}
-  selected=room;
+  selected=room; showDims(room);
   if(!room){roomPill.hidden=true;return;}
   hintPill.hidden=true;
   room.mesh.material.emissive.copy(accent).multiplyScalar(.35);
