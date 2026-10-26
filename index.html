@@ -440,6 +440,8 @@ function buildWalls(cap){
   });
   // face do volume alto da sala acima do telhado da cozinha
   box(X(90),X(600),H,top(HS),Z(1653),Z(1653)+0.15,faceMats({5:'volume'},0,0),walls,true);
+  // parede da TV revestida de pedra moledo
+  box(X(577),X(583),0,top(HS),Z(1660),Z(2408),M.moledo,walls);
   // pilar branco entre a garagem e a entrada da sala
   box(X(583),X(600),0,top(H),Z(2693),Z(2723),M.wall,walls,true);
   // painel claro em volta da porta de entrada, sob a laje
@@ -576,16 +578,38 @@ function pendant(cx,cz){ // pendente de globo de vidro com haste dourada
 }
 [1265,1350,1435].forEach(z=>pendant(370,z));
 // jantar
-F(279,398,0.72,0.76,1662,1899,M.oak); F(320,357,0,0.72,1700,1860,M.black); // mesa 1,00 x 2,00 m
-[1705,1780,1855].forEach(z=>{chair(252,z);chair(425,z);}); chair(338,1634); chair(338,1926);
-// estar
-F(160,455,0,0.012,2080,2380,M.rug,false);
-// sofá 2,90 x 1,00 m de frente para a TV, deixando um corredor de ~1,05 m da porta de entrada até o hall
-F(340,458,0,0.42,2040,2384,M.fabric); F(434,458,0.42,0.85,2040,2384,M.fabric);
-F(340,458,0.42,0.62,2040,2064,M.fabric); F(340,458,0.42,0.62,2360,2384,M.fabric);
-F(205,295,0,0.38,2175,2280,M.oak); // mesa de centro
-F(107,150,0,0.45,2120,2336,M.walnut); F(107,112,0.95,1.62,2160,2296,M.black); // rack e TV
-plant(140,2385,1); plant(545,2470,0.9);
+// materiais da sala: freijó, pedra moledo e tapete estampado
+const FREIJO=new THREE.MeshStandardMaterial({color:0xb98d5c,roughness:.6});
+M.moledo=new THREE.MeshStandardMaterial({roughness:1,map:(()=>{const t=canvasTex(256,256,(g,w,h)=>{
+  g.fillStyle='#6f675c';g.fillRect(0,0,w,h);
+  const tones=['#c9bba3','#b9a98e','#d6c9b2','#a99a82','#c2b49c','#bcae97','#cfc0a6','#9f927c'];
+  let y=0;while(y<h){const rh=14+Math.random()*16;let x=-Math.random()*20;
+    while(x<w){const rw=22+Math.random()*34;g.fillStyle=tones[(Math.random()*tones.length)|0];
+      g.beginPath();g.moveTo(x+2+Math.random()*3,y+2);g.lineTo(x+rw-2,y+1+Math.random()*3);g.lineTo(x+rw-1-Math.random()*3,y+rh-2);g.lineTo(x+1,y+rh-1-Math.random()*3);g.closePath();g.fill();x+=rw;}
+    y+=rh;}
+  speck(g,w,h,2500,.18);});t.repeat.set(7.6/1.4,4.8/1.4);return t;})()});
+const RUG=new THREE.MeshStandardMaterial({roughness:1,map:canvasTex(512,512,(g,w,h)=>{
+  g.fillStyle='#e9e1d2';g.fillRect(0,0,w,h);                  // fundo cru
+  g.strokeStyle='#b5562f';g.lineWidth=46;                     // estampa grande em terracota
+  for(let k=-1;k<3;k++){g.beginPath();g.arc(k*w/2+w/4,h/2,w*0.36,0,Math.PI*2);g.stroke();}
+  g.fillStyle='#1f3a4d';[[w/2,h/2],[0,0],[w,0],[0,h],[w,h]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,w*0.11,0,Math.PI*2);g.fill();});
+  g.strokeStyle='#1f3a4d';g.lineWidth=18;g.strokeRect(9,9,w-18,h-18); // borda
+  speck(g,w,h,6000,.1);})});
+// jantar na horizontal, com buffet à esquerda e espelho na parede
+F(250,487,0.72,0.76,1721,1840,M.oak); F(270,467,0,0.72,1751,1810,M.black); // mesa 2,00 x 1,00 m
+[292,368,444].forEach(x=>{chair(x,1694);chair(x,1868);});
+F(107,160,0,0.85,1700,1860,FREIJO); F(107,160,0.85,0.88,1700,1860,M.top);   // balcão buffet 1,35 m
+F(107,110,1.15,2.15,1715,1845,M.mirror,false); F(110,112,1.15,2.15,1712,1848,M.black,false); // espelho
+cyl(130,1740,0.07,0.88,1.12,M.pot);
+// estar: sofá 2,90 x 1,00 m na parede esquerda, a 0,80 m do pano de vidro
+const rug=box(X(183),X(538),0.03,0.045,Z(1964),Z(2319),[M.rug,M.rug,RUG,M.rug,M.rug,M.rug],furn,false); rug.castShadow=false; // tapete 3 x 3 m
+F(107,225,0,0.42,1969,2313,M.fabric); F(107,131,0.42,0.85,1969,2313,M.fabric);
+F(107,225,0.42,0.62,1969,1993,M.fabric); F(107,225,0.42,0.62,2289,2313,M.fabric);
+F(300,395,0,0.38,2088,2194,M.oak); // mesa de centro
+plant(155,2362,1.15);              // folhagem no vão entre o sofá e o vidro
+// rack de freijó sob a TV, na parede de pedra moledo
+F(535,577,0.15,0.55,2011,2271,FREIJO); F(572,577,1.0,1.7,2073,2209,M.black);
+plant(545,2470,0.9);
 // garagem
 car(765,2420,0xe7e7e4); car(1090,2420,0x3b4a5c);
 
