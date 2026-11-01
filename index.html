@@ -234,7 +234,7 @@ const WALLS=[
   [893,271,911,626,H,[[520,608,'d','a',1]]],
   [600,626,1077,643,H,[[683,790,'o']]],
   [600,997,1077,1015,H,[[610,697,'d','a',-1]]],
-  [708,1015,725,1760,H,[[1125,1213,'d','b',1],[1260,1348,'d','a',1],[1656,1743,'d','a',1]]],
+  [708,1015,725,1760,H,[[1125,1213,'d','b',1],[1260,1348,'d','a',1],[1623,1710,'d','a',1]]], // porta do banheiro social na ponta do Dormitório 2
   [725,1228,1077,1246,H,[]],
   [725,1589,1077,1606,H,[]],
   [600,1760,1077,1778,H,[[610,697,'d','a',1]]],
@@ -517,12 +517,13 @@ function chair(cx,cz){F(cx-20,cx+20,0.43,0.48,cz-20,cz+20,M.oak);F(cx-18,cx+18,0
 function stool(cx,cz){cyl(cx,cz,0.17,0.68,0.74,M.oak);cyl(cx,cz,0.03,0,0.68,M.black);}
 function plant(cx,cz,s){cyl(cx,cz,0.2*s,0,0.45*s,M.pot);const m=new THREE.Mesh(new THREE.IcosahedronGeometry(0.42*s,1),M.leaf);
   m.position.set(X(cx),0.45*s+0.38*s,Z(cz));m.castShadow=true;fg.add(m);}
-function toilet(x1,x2,z1,z2,tankAt){ // tankAt: 'n','e'
-  if(tankAt==='e'){F(x2-18,x2,0.4,0.82,z1,z2,M.ceramic);F(x1,x2-18,0,0.42,z1+4,z2-4,M.ceramic);}
+function toilet(x1,x2,z1,z2,tankAt){ // tankAt: 'n','s','e'
+  if(tankAt==='s'){F(x1,x2,0.4,0.82,z2-18,z2,M.ceramic);F(x1+4,x2-4,0,0.42,z1,z2-18,M.ceramic);}
+  else if(tankAt==='e'){F(x2-18,x2,0.4,0.82,z1,z2,M.ceramic);F(x1,x2-18,0,0.42,z1+4,z2-4,M.ceramic);}
   else{F(x1,x2,0.4,0.82,z1,z1+18,M.ceramic);F(x1+4,x2-4,0,0.42,z1+18,z2,M.ceramic);}
 }
-function vanity(x1,x2,z1,z2,mirror){F(x1,x2,0.3,0.85,z1,z2,M.walnut);F(x1,x2,0.85,0.88,z1,z2,M.top);
-  const cx=(x1+x2)/2,cz=(z1+z2)/2;cyl(cx,cz,0.17,0.88,0.98,M.ceramic);
+function vanity(x1,x2,z1,z2,mirror,r){F(x1,x2,0.3,0.85,z1,z2,M.walnut);F(x1,x2,0.85,0.88,z1,z2,M.top);
+  const cx=(x1+x2)/2,cz=(z1+z2)/2;cyl(cx,cz,r||0.17,0.88,0.98,M.ceramic);
   if(mirror) F(...mirror,M.mirror,false);}
 function shower(gx1,gx2,gz1,gz2,hx,hz){F(gx1,gx2,0,2.0,gz1,gz2,M.glass,true);cyl(hx,hz,0.11,2.05,2.08,M.steel);}
 function sofaRun(x1,x2,z1,z2,back){ // back: lado do encosto
@@ -555,8 +556,9 @@ chair(905,1110); F(850,960,0.95,1.3,1015,1020,M.black,false); F(1030,1077,0,1.9,
 // dormitório 2
 bed(832,1015,1353,1589); stand(787,828,1545,1589); stand(1019,1060,1545,1589); wardrobe(860,1077,1246,1306);
 // banheiro social
-vanity(735,878,1606,1655,[740,873,1.1,1.75,1606,1610]); toilet(920,972,1606,1668,'n');
-shower(997,1002,1606,1700,1040,1640);
+// louças na parede do Dormitório 3, de frente para a porta; cuba menor
+vanity(735,860,1711,1760,[740,855,1.1,1.75,1756,1760],0.13); toilet(892,944,1698,1760,'s');
+shower(965,970,1666,1760,1023,1726); // box de 0,90 × 1,30 m
 // dormitório 3
 bed(795,978,1861,2096); stand(750,791,2052,2096); stand(982,1023,2052,2096); wardrobe(720,1000,1778,1838);
 // cozinha
