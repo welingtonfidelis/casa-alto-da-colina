@@ -152,7 +152,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
 <body>
 
 
-<div id="stage" aria-label="Modelo 3D da casa. Arraste para girar, pinça ou roda para zoom."></div>
+<div id="stage" aria-label="Modelo 3D da casa. No toque, arraste para mover e use a manete para girar; pinça ou roda para zoom."></div>
 
 <header class="top">
   <h1>Casa Alto da Colina</h1>
@@ -186,7 +186,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
     <button class="btn" id="b-canil" data-layer="canil" aria-label="Canil com portão para fora" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21h20M4 21V11l8-6 8 6v10M9 21v-4a3 3 0 0 1 6 0v4"/></svg><span>Canil</span></button>
   </div>
   <div class="info" aria-live="polite">
-    <div class="pill glass" id="hint">Arraste para girar, pinça para zoom, manete para mover. Toque num cômodo para ver as medidas.</div>
+    <div class="pill glass" id="hint">Arraste para mover, pinça para zoom, manete para girar. Toque num cômodo para ver as medidas.</div>
     <div class="pill glass" id="room" hidden>
       <div class="txt"><div class="l1"><span class="nm" id="r-nm"></span><span class="ar" id="r-ar"></span></div><div class="mt" id="r-mt"></div></div>
       <button class="x" id="r-x" aria-label="Fechar"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
@@ -195,8 +195,8 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
   <p class="help">Arraste para girar · roda para zoom · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ou setas para mover · clique num cômodo para ver as medidas. Em <b>Sem teto</b> ou <b>Planta</b> dá para ver o interior. Os adicionais em estudo ficam atrás da casa: veja pela câmera <b>Fundos</b>.</p>
 </div>
 
-<div class="joy glass" id="joy" tabindex="0" role="application" aria-label="Manete: arraste para mover a câmera. No teclado, use as setas.">
-  <div class="knob" id="knob"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14M9.5 7.5 12 5l2.5 2.5M9.5 16.5 12 19l2.5-2.5M7.5 9.5 5 12l2.5 2.5M16.5 9.5 19 12l-2.5 2.5"/></svg></div>
+<div class="joy glass" id="joy" tabindex="0" role="application" aria-label="Manete: arraste para girar a câmera em volta da casa.">
+  <div class="knob" id="knob"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4"/></svg></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -281,6 +281,8 @@ const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(38,1,0.1,400);
 const controls=new THREE.OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true; controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=4; controls.maxDistance=80;
+// toque: um dedo arrasta a câmera pelo terreno, dois dedos fazem zoom; o giro fica com a manete
+controls.touches={ONE:THREE.TOUCH.PAN,TWO:THREE.TOUCH.DOLLY_PAN}; controls.screenSpacePanning=false;
 
 scene.add(new THREE.HemisphereLight(0xffffff,0x8a939b,0.75));
 const sun=new THREE.DirectionalLight(0xffffff,0.75);
@@ -1017,8 +1019,15 @@ addEventListener('keydown',e=>{const k=KEYMAP[e.code];if(k){held.add(k);fly=null
 addEventListener('keyup',e=>{const k=KEYMAP[e.code];if(k)held.delete(k);});
 addEventListener('blur',()=>held.clear());
 let last=performance.now();
+function orbitCamera(dt){ // manete: gira a câmera em volta do ponto que ela olha
+  if(Math.abs(joy.r)<0.01&&Math.abs(joy.f)<0.01) return;
+  const off=camera.position.clone().sub(controls.target), sp=new THREE.Spherical().setFromVector3(off);
+  sp.theta-=joy.r*1.8*dt;
+  sp.phi=Math.max(0.05,Math.min(controls.maxPolarAngle,sp.phi+joy.f*1.2*dt));
+  camera.position.copy(controls.target).add(off.setFromSpherical(sp));
+}
 function moveCamera(dt){
-  let f=joy.f, r=joy.r;
+  let f=0, r=0;
   if(held.has('f'))f+=1; if(held.has('b'))f-=1; if(held.has('r'))r+=1; if(held.has('l'))r-=1;
   const mag=Math.hypot(f,r); if(mag<0.01) return;
   if(mag>1){f/=mag;r/=mag;}
@@ -1039,7 +1048,7 @@ function tick(now){
     camera.position.lerpVectors(fly.from.p,fly.to.p,e); controls.target.lerpVectors(fly.from.t,fly.to.t,e);
     if(t>=1) fly=null;
   }
-  const dt=Math.min(0.05,(now-last)/1000); last=now; moveCamera(dt);
+  const dt=Math.min(0.05,(now-last)/1000); last=now; moveCamera(dt); orbitCamera(dt);
   controls.update(); renderer.render(scene,camera); labelR.render(scene,camera);
   requestAnimationFrame(tick);
 }
