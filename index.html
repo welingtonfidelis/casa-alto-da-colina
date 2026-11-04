@@ -505,6 +505,20 @@ function faceMats(fm,w,h){
   }
   return arr;
 }
+// basculantes altos da sala (J4): dois em faixa de 1,70 × 0,30 m, colados no teto (verga de 20 cm) e distribuídos na largura interna (de X(107) a X(583)), em m
+const BAS={sill:4.3,head:4.6,w:1.7};
+BAS.x=[0,1].map(i=>{const a=X(107)+(L(583-107)-2*BAS.w)/3*(i+1)+BAS.w*i; return [a,a+BAS.w];});
+function basculante(a,b,y0,y1,zc,cols){ // caixilho preto com folhas de vidro entreabertas (a borda de baixo sai para fora); cols folhas lado a lado
+  const fw=0.04, fd=0.06, cw=(b-a-fw*(cols+1))/cols, ph=y1-y0-2*fw;
+  for(let i=0;i<=cols;i++){const u=a+i*(cw+fw); box(u,u+fw,y0,y1,zc-fd/2,zc+fd/2,M.frame,walls);} // laterais e montantes
+  box(a,b,y0,y0+fw,zc-fd/2,zc+fd/2,M.frame,walls); box(a,b,y1-fw,y1,zc-fd/2,zc+fd/2,M.frame,walls);
+  for(let i=0;i<cols;i++){
+    const leaf=new THREE.Group(); leaf.position.set(a+fw+cw*(i+0.5)+fw*i,y0+fw+ph/2,zc); leaf.rotation.x=0.3; walls.add(leaf);
+    const w=cw-0.01;
+    box(-w/2,w/2,-ph/2+0.015,ph/2-0.015,-0.006,0.006,M.glass,leaf);
+    box(-w/2,w/2,-ph/2,-ph/2+0.015,-0.012,0.012,M.frame,leaf); box(-w/2,w/2,ph/2-0.015,ph/2,-0.012,0.012,M.frame,leaf);
+  }
+}
 function buildWalls(cap){
   scene.remove(walls); walls.traverse(o=>{if(o.geometry)o.geometry.dispose();});
   walls=new THREE.Group(); scene.add(walls);
@@ -557,8 +571,15 @@ function buildWalls(cap){
     });
     piece(cur,end,0,h);
   });
-  // face do volume alto da sala acima do telhado da cozinha
-  box(X(90),X(600),H,top(HS),Z(1653),Z(1653)+0.15,faceMats({5:'volume'},0,0),walls,true);
+  // face do volume alto da sala acima do telhado da cozinha, virada para o fundo, com 2 basculantes em faixa
+  // de 1,70 × 0,30 m no alto (de 4,30 a 4,60 m) para o ar quente sair do pé-direito de 4,80 m
+  {
+    const z0=Z(1653), z1=z0+0.15, x0=X(90), x1=X(600), fm=faceMats({5:'volume'},0,0);
+    const F=(a,b,y0,y1)=>{y1=top(y1); if(y1>y0) box(a,b,y0,y1,z0,z1,fm,walls,true);};
+    F(x0,x1,H,BAS.sill); F(x0,x1,BAS.head,HS);
+    let cx=x0; BAS.x.forEach(([a,b])=>{F(cx,a,BAS.sill,BAS.head); cx=b;}); F(cx,x1,BAS.sill,BAS.head);
+    if(top(HS)>=BAS.head) BAS.x.forEach(([a,b])=>basculante(a,b,BAS.sill,BAS.head,(z0+z1)/2,2));
+  }
   // parede da TV revestida de pedra moledo
   box(X(577),X(583),0,top(HS),Z(1660),Z(2408),M.moledo,walls);
   // pilar branco entre a garagem e a entrada da sala
