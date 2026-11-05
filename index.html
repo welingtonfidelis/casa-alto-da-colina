@@ -316,14 +316,14 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
 const S=118.5, CX=681, CZ=1390.5;
 const X=p=>(p-CX)/S, Z=p=>(p-CZ)/S, L=p=>p/S;
 const FRONT=Z(2723)+3.0; // alinhamento do passeio: 3,00 m à frente da garagem
-const H=3.5, HS=4.8; // pé-direito: alas 3,50 m; sala/cozinha 4,80 m (Corte AA)
+const H=3.5, HS=4.5; // pé-direito: sala 4,50 m; o resto da casa, cozinha inclusive, 3,50 m
 
 // tipos de vão (Tabela de Esquadrias)
 const K={
   d:{sill:0,head:2.1,glass:false,leaf:true}, // P1 porta de madeira (folha aberta conforme a planta)
   o:{sill:0,head:2.1,glass:false},     // vão sem folha (closet)
   g:{sill:0,head:2.1,glass:true},      // P2 blindex de abrir
-  sf:{sill:0,head:3.2,glass:false,fold:6}, // porta sanfonada de vidro da cozinha, 3,16 m em 6 folhas de 0,51, desenhada fechada
+  sf:{sill:0,head:2.8,glass:false,fold:6}, // porta sanfonada de vidro da cozinha, 3,16 × 2,80 m em 6 folhas de 0,51, desenhada fechada
   v:{sill:0,head:2.7,glass:false},     // passagem sala → hall
   w:{sill:1.1,head:2.1,glass:true},    // J1/J3 vitraux 1,50 x 1,00
   w2:{sill:1.5,head:2.1,glass:true},   // J2 basculante 0,80 x 0,60
@@ -354,7 +354,7 @@ const WALLS=[
   [90,1653,107,2428,HS,[],{1:'volume'}],
   [90,2408,583,2428,HS,[[190,368,'tall'],[460,570,'d4']],{4:'volume'}]
 ];
-const SOCIAL={d:'4,03 × 11,00 m · ambiente integrado',a:44.33,h:'4,80'};
+const SOCIAL={d:'4,03 × 11,00 m · ambiente integrado',a:44.33,h:'4,50'};
 const KITCHEN={d:'4,03 × 11,00 m · ambiente integrado',a:44.33,h:'3,50'};
 const ROOMS=[
   {n:'Área de serviço',r:[600,75,1077,253],d:'4,03 × 1,50 m',a:6.05,t:'serv'},
@@ -720,7 +720,7 @@ M.moledo=new THREE.MeshStandardMaterial({roughness:1,map:(()=>{const t=canvasTex
     while(x<w){const rw=22+Math.random()*34;g.fillStyle=tones[(Math.random()*tones.length)|0];
       g.beginPath();g.moveTo(x+2+Math.random()*3,y+2);g.lineTo(x+rw-2,y+1+Math.random()*3);g.lineTo(x+rw-1-Math.random()*3,y+rh-2);g.lineTo(x+1,y+rh-1-Math.random()*3);g.closePath();g.fill();x+=rw;}
     y+=rh;}
-  speck(g,w,h,2500,.18);});t.repeat.set(7.6/1.4,4.8/1.4);return t;})()});
+  speck(g,w,h,2500,.18);});t.repeat.set(7.6/1.4,HS/1.4);return t;})()});
 const RUG=new THREE.MeshStandardMaterial({roughness:1,map:canvasTex(512,512,(g,w,h)=>{
   g.fillStyle='#e9e1d2';g.fillRect(0,0,w,h);                  // fundo cru
   g.strokeStyle='#b5562f';g.lineWidth=46;                     // estampa grande em terracota
