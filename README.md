@@ -5,7 +5,7 @@ Modelo 3D interativo da casa do Lote 04 (Jacuí-MG), montado a partir da planta 
 - Modos: casa completa, sem teto e planta (paredes cortadas a 1,20 m)
 - Câmeras: isométrica, de cima e fachada
 - Móveis, portas internas e pisos com acabamento (dá para ocultar os móveis no menu)
-- Dois basculantes em faixa de 1,70 × 0,30 m na parede alta da sala, acima do telhado da cozinha (de 4,30 a 4,60 m), virados para o fundo, para o ar quente sair do pé-direito de 4,80 m
+- Porta sanfonada de vidro da cozinha para o fundo, da parede de 1,00 m à esquerda até a parede dos quartos (3,16 m, sem parede à direita), desenhada fechada; aberta, as 6 folhas de 0,51 m dobram para fora e ficam atrás da parede da esquerda
 - Toque num cômodo para ver medidas, área, pé-direito e as cotas das paredes
 - Lote de 10 × 36 m com muros e portões na frente e nas laterais; no fundo, alambrado com portão de pedestre para a área verde (dá para ocultar no menu)
 - Adicionais em estudo, cada um com liga/desliga em Camadas e visíveis pela câmera Fundos:

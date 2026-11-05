@@ -323,7 +323,7 @@ const K={
   d:{sill:0,head:2.1,glass:false,leaf:true}, // P1 porta de madeira (folha aberta conforme a planta)
   o:{sill:0,head:2.1,glass:false},     // vão sem folha (closet)
   g:{sill:0,head:2.1,glass:true},      // P2 blindex de abrir
-  p3:{sill:0,head:3.2,glass:true},     // P3 blindex de correr 2,80 de largura (cozinha com pé-direito 3,50)
+  sf:{sill:0,head:3.2,glass:false,fold:6}, // porta sanfonada de vidro da cozinha, 3,16 m em 6 folhas de 0,51, desenhada fechada
   v:{sill:0,head:2.7,glass:false},     // passagem sala → hall
   w:{sill:1.1,head:2.1,glass:true},    // J1/J3 vitraux 1,50 x 1,00
   w2:{sill:1.5,head:2.1,glass:true},   // J2 basculante 0,80 x 0,60
@@ -349,7 +349,7 @@ const WALLS=[
   [600,1760,1077,1778,H,[[610,697,'d','a',1]]],
   [583,2096,1272,2113,H,[[1127,1222,'d','b',-1]],{4:'stone'}],
   [1255,2113,1272,2723,H,[]],
-  [90,1093,583,1110,H,[[178,512,'p3']]],
+  [90,1093,583,1110,H,[[208.5,583,'sf']]], // porta da cozinha: parede de 1,00 m à esquerda, onde as folhas recolhem, e vão até a parede dos quartos (sem sobra à direita)
   [90,1093,107,1653,H,[]],
   [90,1653,107,2428,HS,[],{1:'volume'}],
   [90,2408,583,2428,HS,[[190,368,'tall'],[460,570,'d4']],{4:'volume'}]
@@ -505,20 +505,6 @@ function faceMats(fm,w,h){
   }
   return arr;
 }
-// basculantes altos da sala (J4): dois em faixa de 1,70 × 0,30 m, colados no teto (verga de 20 cm) e distribuídos na largura interna (de X(107) a X(583)), em m
-const BAS={sill:4.3,head:4.6,w:1.7};
-BAS.x=[0,1].map(i=>{const a=X(107)+(L(583-107)-2*BAS.w)/3*(i+1)+BAS.w*i; return [a,a+BAS.w];});
-function basculante(a,b,y0,y1,zc,cols){ // caixilho preto com folhas de vidro entreabertas (a borda de baixo sai para fora); cols folhas lado a lado
-  const fw=0.04, fd=0.06, cw=(b-a-fw*(cols+1))/cols, ph=y1-y0-2*fw;
-  for(let i=0;i<=cols;i++){const u=a+i*(cw+fw); box(u,u+fw,y0,y1,zc-fd/2,zc+fd/2,M.frame,walls);} // laterais e montantes
-  box(a,b,y0,y0+fw,zc-fd/2,zc+fd/2,M.frame,walls); box(a,b,y1-fw,y1,zc-fd/2,zc+fd/2,M.frame,walls);
-  for(let i=0;i<cols;i++){
-    const leaf=new THREE.Group(); leaf.position.set(a+fw+cw*(i+0.5)+fw*i,y0+fw+ph/2,zc); leaf.rotation.x=0.3; walls.add(leaf);
-    const w=cw-0.01;
-    box(-w/2,w/2,-ph/2+0.015,ph/2-0.015,-0.006,0.006,M.glass,leaf);
-    box(-w/2,w/2,-ph/2,-ph/2+0.015,-0.012,0.012,M.frame,leaf); box(-w/2,w/2,ph/2-0.015,ph/2,-0.012,0.012,M.frame,leaf);
-  }
-}
 function buildWalls(cap){
   scene.remove(walls); walls.traverse(o=>{if(o.geometry)o.geometry.dispose();});
   walls=new THREE.Group(); scene.add(walls);
@@ -562,6 +548,17 @@ function buildWalls(cap){
         else{const zh=Z(hp)+dir*0.025, xf=sd>0?X(x2):X(x1);
           box(sd>0?xf:xf-W,sd>0?xf+W:xf,0.01,hh,zh-0.02,zh+0.02,M.door,walls,true);}
       }
+      if(t.fold && horiz){ // sanfonada fechada: batente preto e folhas de vidro lado a lado no vão; aberta, dobram para fora e encostam na sobra de parede da esquerda
+        const A=X(a),B=X(b),bw=0.05,sw=0.04,hl=top(t.head-bw),w=(B-A-2*bw)/t.fold;
+        box(A,A+bw,0,top(t.head),mid-0.035,mid+0.035,M.frame,walls); box(B-bw,B,0,top(t.head),mid-0.035,mid+0.035,M.frame,walls);
+        if(t.head<=cap) box(A,B,t.head-bw,t.head,mid-0.035,mid+0.035,M.frame,walls);
+        for(let i=0;i<t.fold;i++){
+          const u0=A+bw+i*w, u1=u0+w;
+          box(u0+sw,u1-sw,0.08,hl-sw,mid-0.006,mid+0.006,M.glass,walls);
+          box(u0,u0+sw,0,hl,mid-0.022,mid+0.022,M.frame,walls); box(u1-sw,u1,0,hl,mid-0.022,mid+0.022,M.frame,walls);
+          box(u0,u1,0,0.08,mid-0.022,mid+0.022,M.frame,walls); if(t.head<=cap) box(u0,u1,hl-sw,hl,mid-0.022,mid+0.022,M.frame,walls);
+        }
+      }
       if(t.door && horiz){ // porta de madeira com puxador vertical
         const A=X(a),B=X(b),dz=Z(z2)-0.05,hh=top(t.head);
         box(A,B,0,hh,dz-0.025,dz+0.025,M.wood,walls,true);
@@ -571,15 +568,8 @@ function buildWalls(cap){
     });
     piece(cur,end,0,h);
   });
-  // face do volume alto da sala acima do telhado da cozinha, virada para o fundo, com 2 basculantes em faixa
-  // de 1,70 × 0,30 m no alto (de 4,30 a 4,60 m) para o ar quente sair do pé-direito de 4,80 m
-  {
-    const z0=Z(1653), z1=z0+0.15, x0=X(90), x1=X(600), fm=faceMats({5:'volume'},0,0);
-    const F=(a,b,y0,y1)=>{y1=top(y1); if(y1>y0) box(a,b,y0,y1,z0,z1,fm,walls,true);};
-    F(x0,x1,H,BAS.sill); F(x0,x1,BAS.head,HS);
-    let cx=x0; BAS.x.forEach(([a,b])=>{F(cx,a,BAS.sill,BAS.head); cx=b;}); F(cx,x1,BAS.sill,BAS.head);
-    if(top(HS)>=BAS.head) BAS.x.forEach(([a,b])=>basculante(a,b,BAS.sill,BAS.head,(z0+z1)/2,2));
-  }
+  // face do volume alto da sala acima do telhado da cozinha
+  box(X(90),X(600),H,top(HS),Z(1653),Z(1653)+0.15,faceMats({5:'volume'},0,0),walls,true);
   // parede da TV revestida de pedra moledo
   box(X(577),X(583),0,top(HS),Z(1660),Z(2408),M.moledo,walls);
   // pilar branco entre a garagem e a entrada da sala
