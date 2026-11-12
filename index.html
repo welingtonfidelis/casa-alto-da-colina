@@ -327,18 +327,19 @@ const K={
   v:{sill:0,head:2.7,glass:false},     // passagem sala → hall
   w:{sill:1.1,head:2.1,glass:true},    // J1/J3 vitraux 1,50 x 1,00
   w2:{sill:1.5,head:2.1,glass:true},   // J2 basculante 0,80 x 0,60
-  w3:{sill:1.4,head:2.1,glass:true},   // basculante ampliado 1,00 x 0,70 (banheiro da suíte e área de serviço)
+  w3:{sill:1.4,head:2.1,glass:true},   // basculante ampliado 1,00 x 0,70 (banheiro da suíte)
+  jc:{sill:1.5,head:2.1,glass:true,frame:true,rows:[]}, // janela de correr 1,50 x 0,60 (área de serviço)
   tall:{sill:0,head:4.3,glass:true,frame:true}, // pano de vidro da fachada (referência)
   d4:{sill:0,head:2.1,glass:false,door:true},   // P4 porta de entrada em madeira
   pb:{sill:0,head:2.1,glass:true,frame:true,rows:[]} // porta-balcão de correr da suíte, 1,60 m
 };
 // paredes: [x1,z1,x2,z2,altura,[vãos ao longo do eixo]]
 const WALLS=[
-  [583,58,1094,75,H,[]], // fundo da área de serviço, sem janela
+  [583,58,1094,75,H,[[750,927,'jc']]], // fundo da área de serviço: janela de correr centralizada na parede
   [583,75,600,1093,H,[[150,237,'g'],[725,915,'pb']]],
   [583,1093,600,1653,H,[[1513,1653,'v']]],
   [583,1653,600,2428,HS,[]],
-  [1077,75,1094,2113,H,[[105,223,'w3'],[388,507,'w3'],[1053,1193,'w'],[1328,1506,'w'],[1636,1730,'w2'],[1848,2025,'w']]],
+  [1077,75,1094,2113,H,[[388,507,'w3'],[1053,1193,'w'],[1328,1506,'w'],[1636,1730,'w2'],[1848,2025,'w']]],
   [600,253,1077,271,H,[]],
   [893,271,911,626,H,[[520,608,'d','a',1]]],
   [600,626,1077,643,H,[[683,790,'o']]],
@@ -663,7 +664,7 @@ function car(cx,cz,col){ // frente voltada para a rua
 }
 // área de serviço
 F(905,990,0,0.85,80,150,M.ceramic); cyl(947,151,0.17,0.45,0.47,M.carGlass).rotation.x=Math.PI/2;
-F(1000,1072,0,0.9,80,140,M.ceramic); F(620,880,1.5,2.1,75,115,M.lacq);
+F(1000,1072,0,0.9,80,140,M.ceramic); F(605,742,1.5,2.1,75,115,M.lacq); // armário aéreo encurtado para 1,15 m, à esquerda da janela
 // closet
 wardrobe(600,665,271,626); wardrobe(665,893,271,336);
 // banheiro da suíte
